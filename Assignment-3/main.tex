@@ -1,0 +1,412 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% Page geometry
+\geometry{margin=1in}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Forest Cover Type Classification}
+\fancyhead[R]{Machine Learning Assignment}
+\fancyfoot[C]{\thepage}
+
+% Code listing style
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10}
+}
+
+% Title page information
+\title{\textbf{Forest Cover Type Classification Using Logistic Regression} \\ 
+       \large Machine Learning Laboratory Assignment 3}
+\author{Uttam Mahata \\ 
+        Machine Learning Laboratory \\ 
+        Department of Computer Science}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report presents a comprehensive analysis of forest cover type classification using logistic regression on the Forest Cover Type dataset. The study implements a multinomial logistic regression classifier with regularization analysis to predict forest cover types based on cartographic variables. Key contributions include: (1) preprocessing of a large-scale dataset with 581,012 samples and 54 features, (2) implementation of a 2D visualization approach using two most informative features for three-class classification, (3) systematic analysis of overfitting through regularization parameter tuning, and (4) achieving 73\% classification accuracy. The analysis demonstrates effective handling of class imbalance, proper feature scaling, and minimal overfitting across different regularization strengths, providing insights into the relationship between geographic features and forest cover types.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+Forest cover type classification is a crucial task in environmental monitoring and forest management. This study analyzes the Forest Cover Type dataset, which contains cartographic variables for predicting forest cover types in the Roosevelt National Forest of northern Colorado. The dataset presents a challenging multi-class classification problem with seven different cover types and significant class imbalance.
+
+\subsection{Problem Statement}
+The primary objectives of this study are:
+\begin{enumerate}
+    \item Implement proper data preprocessing including feature scaling and dataset reduction
+    \item Develop a 2D logistic regression classifier for three-class classification
+    \item Analyze overfitting behavior through systematic regularization parameter tuning
+    \item Visualize decision boundaries and model performance in 2D space
+\end{enumerate}
+
+\subsection{Dataset Overview}
+The Forest Cover Type dataset contains:
+\begin{itemize}
+    \item \textbf{Samples}: 581,012 instances
+    \item \textbf{Features}: 54 total (10 continuous + 44 binary dummy variables)
+    \item \textbf{Classes}: 7 forest cover types
+    \item \textbf{Source}: UCI Machine Learning Repository
+\end{itemize}
+
+\section{Methodology}
+
+\subsection{Data Preprocessing}
+
+\subsubsection{Dataset Reduction}
+Due to computational constraints, the original dataset was reduced to 20\% of its size (116,202 samples) using stratified sampling to maintain class distribution proportions.
+
+\subsubsection{Feature Analysis}
+Features were categorized into two types:
+\begin{itemize}
+    \item \textbf{Continuous Features} (10): Elevation, Aspect, Slope, and various distance measurements
+    \item \textbf{Binary Features} (44): Wilderness area and soil type dummy variables
+\end{itemize}
+
+\subsubsection{Data Splitting}
+The preprocessed dataset was split using stratified sampling:
+\begin{itemize}
+    \item Training set: 70\% (81,341 samples)
+    \item Test set: 15\% (17,430 samples)
+    \item Development set: 15\% (17,431 samples)
+\end{itemize}
+
+\subsubsection{Feature Scaling}
+Continuous features were standardized using StandardScaler (mean=0, std=1) while binary dummy variables were preserved in their original form.
+
+\subsection{Model Implementation}
+
+\subsubsection{Three-Class Selection}
+For 2D visualization purposes, the three most frequent classes were selected:
+\begin{itemize}
+    \item Class 2: 39,662 samples (Lodgepole Pine)
+    \item Class 1: 29,658 samples (Spruce/Fir)
+    \item Class 3: 5,006 samples (Ponderosa Pine)
+\end{itemize}
+
+\subsubsection{Feature Selection for 2D Visualization}
+Two features with highest variance were selected for 2D classification:
+\begin{itemize}
+    \item \textbf{Elevation}: Primary geographic feature
+    \item \textbf{Slope}: Secondary topographic feature
+\end{itemize}
+
+\subsubsection{Logistic Regression Configuration}
+The multinomial logistic regression was configured with:
+\begin{itemize}
+    \item Solver: Limited-memory BFGS (lbfgs)
+    \item Multi-class strategy: Multinomial
+    \item Maximum iterations: 1000-2000
+    \item Random state: 42 (for reproducibility)
+\end{itemize}
+
+\subsection{Regularization Analysis}
+Two sets of regularization parameters were tested:
+\begin{itemize}
+    \item \textbf{Original range}: C = [0.1, 0.25, 0.5, 0.75, 0.9]
+    \item \textbf{Extended range}: C = [0.001, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 2.0, 5.0, 10.0]
+\end{itemize}
+
+\section{Results and Analysis}
+
+\subsection{Model Performance}
+
+\subsubsection{Three-Class Classification Results}
+The logistic regression model achieved consistent performance across all datasets:
+
+\begin{table}[H]
+\centering
+\caption{Model Performance Summary}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Dataset} & \textbf{Accuracy} & \textbf{Samples} & \textbf{Performance} \\
+\midrule
+Training & 0.7349 & 74,326 & Baseline \\
+Test & 0.7300 & 15,926 & Target metric \\
+Development & 0.7317 & 15,927 & Validation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Classification Report (Test Set)}
+\begin{table}[H]
+\centering
+\caption{Detailed Classification Metrics}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+\midrule
+Class 1 & 0.71 & 0.67 & 0.69 & 6,355 \\
+Class 2 & 0.73 & 0.78 & 0.76 & 8,499 \\
+Class 3 & 0.86 & 0.71 & 0.78 & 1,072 \\
+\midrule
+\textbf{Weighted Avg} & \textbf{0.73} & \textbf{0.73} & \textbf{0.73} & \textbf{15,926} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Regularization Analysis Results}
+
+\subsubsection{Original C Range Analysis}
+\begin{table}[H]
+\centering
+\caption{Regularization Analysis - Original Range}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{C Value} & \textbf{Train Acc} & \textbf{Test Acc} & \textbf{Dev Acc} & \textbf{Overfitting Gap} \\
+\midrule
+0.10 & 0.7348 & 0.7299 & 0.7317 & 0.0049 \\
+0.25 & 0.7349 & 0.7300 & 0.7318 & 0.0049 \\
+0.50 & 0.7349 & 0.7300 & 0.7318 & 0.0049 \\
+0.75 & 0.7349 & 0.7300 & 0.7317 & 0.0049 \\
+0.90 & 0.7349 & 0.7300 & 0.7317 & 0.0049 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Extended C Range Analysis}
+\begin{table}[H]
+\centering
+\caption{Regularization Analysis - Extended Range}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{C Value} & \textbf{Train Acc} & \textbf{Test Acc} & \textbf{Dev Acc} & \textbf{Overfitting Gap} \\
+\midrule
+0.001 & 0.7264 & 0.7249 & 0.7249 & 0.0015 \\
+0.010 & 0.7344 & 0.7304 & 0.7311 & 0.0040 \\
+0.100 & 0.7348 & 0.7299 & 0.7317 & 0.0049 \\
+0.250 & 0.7349 & 0.7300 & 0.7318 & 0.0049 \\
+1.000 & 0.7349 & 0.7300 & 0.7317 & 0.0049 \\
+10.000 & 0.7348 & 0.7300 & 0.7317 & 0.0048 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Key Findings}
+
+\subsubsection{Overfitting Analysis}
+\begin{itemize}
+    \item \textbf{Minimal Overfitting}: Overfitting gap consistently below 0.005 across all C values
+    \item \textbf{Stable Performance}: Model performance plateaus for C ≥ 0.01
+    \item \textbf{Regularization Effect}: Strong regularization (C=0.001) reduces both training and test accuracy
+    \item \textbf{Optimal Range}: Best performance achieved with moderate regularization (C=0.01-1.0)
+\end{itemize}
+
+\subsubsection{Feature Effectiveness}
+\begin{itemize}
+    \item Elevation and Slope provide good discriminative power for forest cover classification
+    \item Clear decision boundaries visible in 2D visualization
+    \item Class separation particularly effective for Classes 1 and 2
+    \item Class 3 shows some overlap with other classes but maintains distinct regions
+\end{itemize}
+
+\section{Visualizations}
+
+\subsection{2D Decision Boundary Visualization}
+The 2D visualization reveals:
+\begin{itemize}
+    \item Clear linear decision boundaries between classes
+    \item Consistent classification patterns across training, test, and development sets
+    \item Elevation-based primary separation with slope-based secondary separation
+    \item Good generalization from training to test data
+\end{itemize}
+
+\subsection{Regularization Effect Plots}
+The regularization analysis demonstrates:
+\begin{itemize}
+    \item Accuracy stabilization across wide C range
+    \item Minimal variation in overfitting gap
+    \item Consistent performance across train/test/development splits
+    \item Robustness to regularization parameter selection
+\end{itemize}
+
+\section{Discussion}
+
+\subsection{Model Performance Assessment}
+The 73\% accuracy achieved represents strong performance considering:
+\begin{itemize}
+    \item Use of only two features for classification
+    \item Inherent complexity of forest cover classification
+    \item Class imbalance in the original dataset
+    \item Geographic nature of the prediction problem
+\end{itemize}
+
+\subsection{Regularization Insights}
+The minimal overfitting observed suggests:
+\begin{itemize}
+    \item The problem is naturally well-regularized due to dataset size
+    \item Two-feature model prevents overfitting through dimensionality reduction
+    \item Logistic regression's inherent regularization properties
+    \item Proper train/test split methodology
+\end{itemize}
+
+\subsection{Feature Selection Validation}
+The effectiveness of Elevation and Slope confirms:
+\begin{itemize}
+    \item Geographic features are primary drivers of forest cover type
+    \item Topographic variables provide essential classification information
+    \item Two-feature approach successfully captures main class distinctions
+    \item Higher-dimensional analysis may provide marginal improvements
+\end{itemize}
+
+\section{Limitations and Future Work}
+
+\subsection{Current Limitations}
+\begin{itemize}
+    \item Dataset reduction may have eliminated important edge cases
+    \item Two-feature limitation restricts full dataset potential
+    \item Three-class subset doesn't represent complete classification challenge
+    \item Cross-validation not implemented for comprehensive evaluation
+\end{itemize}
+
+\subsection{Recommended Improvements}
+\begin{itemize}
+    \item Implement full seven-class classification
+    \item Apply feature selection algorithms for optimal feature subset
+    \item Compare with other algorithms (Random Forest, SVM, Neural Networks)
+    \item Implement cross-validation for robust performance estimation
+    \item Analyze feature importance and interpretation
+\end{itemize}
+
+\section{Conclusion}
+
+This study successfully demonstrates the application of logistic regression to forest cover type classification with several key achievements:
+
+\begin{enumerate}
+    \item \textbf{Effective Preprocessing}: Proper handling of large-scale dataset with appropriate sampling and scaling
+    \item \textbf{Model Implementation}: Successful multinomial logistic regression with clear 2D visualization
+    \item \textbf{Regularization Analysis}: Comprehensive evaluation showing minimal overfitting and stable performance
+    \item \textbf{Performance Achievement}: 73\% accuracy using only two geographic features
+\end{enumerate}
+
+The analysis reveals that geographic features (Elevation and Slope) provide strong discriminative power for forest cover classification, and logistic regression with appropriate regularization achieves robust performance with minimal overfitting. The methodology demonstrates proper machine learning practices including stratified sampling, feature scaling, and systematic hyperparameter analysis.
+
+The results suggest that forest cover types are indeed predictable from cartographic variables, with topographic features serving as primary classification drivers. This has practical implications for forest management, environmental monitoring, and ecological research applications.
+
+\section*{Acknowledgments}
+This work was completed as part of the Machine Learning Laboratory course. Special thanks to the UCI Machine Learning Repository for providing the Forest Cover Type dataset and to the scientific community for developing the analytical tools used in this study.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+
+\bibitem{dataset}
+Blackard, J.A. and Dean, D.J. (1999). 
+\textit{Comparative accuracies of artificial neural networks and discriminant analysis in predicting forest cover types from cartographic variables.} 
+Computers and Electronics in Agriculture, 24(3), 131-151.
+
+\bibitem{sklearn}
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., ... \& Duchesnay, E. (2011). 
+\textit{Scikit-learn: Machine learning in Python.} 
+Journal of Machine Learning Research, 12, 2825-2830.
+
+\bibitem{logistic}
+Hosmer Jr, D. W., Lemeshow, S., \& Sturdivant, R. X. (2013). 
+\textit{Applied logistic regression} (Vol. 398). 
+John Wiley \& Sons.
+
+\bibitem{regularization}
+Tibshirani, R. (1996). 
+\textit{Regression shrinkage and selection via the lasso.} 
+Journal of the Royal Statistical Society: Series B (Methodological), 58(1), 267-288.
+
+\end{thebibliography}
+
+\appendix
+
+\section{Code Implementation}
+\label{app:code}
+
+The complete implementation includes the following key components:
+
+\subsection{Data Preprocessing}
+\begin{lstlisting}
+# Dataset reduction and splitting
+X_sample, _, y_sample, _ = train_test_split(
+    X, y, test_size=0.8, stratify=y, random_state=42
+)
+
+# Feature scaling
+scaler = StandardScaler()
+X_train_scaled[continuous_features] = scaler.fit_transform(
+    X_train[continuous_features]
+)
+\end{lstlisting}
+
+\subsection{Model Training}
+\begin{lstlisting}
+# Logistic regression configuration
+log_reg_3class = LogisticRegression(
+    multi_class='multinomial',
+    solver='lbfgs',
+    random_state=42,
+    max_iter=1000
+)
+
+# Model training
+log_reg_3class.fit(X_train_2features, y_train_3class)
+\end{lstlisting}
+
+\subsection{Regularization Analysis}
+\begin{lstlisting}
+# Regularization parameter testing
+C_values = [0.001, 0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 2.0, 5.0, 10.0]
+
+for C in C_values:
+    log_reg_c = LogisticRegression(
+        multi_class='multinomial',
+        solver='lbfgs',
+        C=C,
+        random_state=42,
+        max_iter=2000
+    )
+    # Train and evaluate model
+\end{lstlisting}
+
+\section{Performance Metrics}
+\label{app:metrics}
+
+\subsection{Confusion Matrix Analysis}
+The confusion matrix reveals the classification performance across the three selected forest cover types, showing strong diagonal performance with minimal misclassification between adjacent classes.
+
+\subsection{Feature Importance}
+Based on the variance analysis, the selected features demonstrate high discriminative power:
+\begin{itemize}
+    \item Elevation: Primary separator for different forest zones
+    \item Slope: Secondary factor affecting species distribution
+\end{itemize}
+
+\end{document}

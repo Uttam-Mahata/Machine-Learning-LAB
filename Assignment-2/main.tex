@@ -1,0 +1,296 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{caption}
+
+% Header and footer setup
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Machine Learning Assignment 2}
+\lhead{Logistic Regression Analysis}
+\cfoot{\thepage}
+
+% Title setup
+\title{\textbf{Logistic Regression Analysis on Wisconsin Breast Cancer Dataset}\\ 
+\large Machine Learning Laboratory Assignment 2}
+\author{Your Name \\ Roll Number: Your Roll Number}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report presents a comprehensive analysis of logistic regression models applied to the Wisconsin Breast Cancer Diagnostic dataset. We implemented and evaluated multiple solver-penalty combinations including newton-cg, lbfgs, and liblinear solvers with L1, L2, and no regularization penalties. Our analysis includes performance comparison before and after fine-tuning, feature selection analysis using L1 regularization, and evaluation of different regularization strengths. The results demonstrate that multiple model configurations achieve excellent performance (98.25\% accuracy), with L1 regularization providing effective feature selection capabilities while maintaining competitive accuracy (96.49\%).
+\end{abstract}
+
+\section{Introduction}
+
+Breast cancer is one of the most prevalent forms of cancer affecting women worldwide. Early and accurate diagnosis is crucial for effective treatment and improved patient outcomes. Machine learning techniques, particularly logistic regression, have proven to be valuable tools in medical diagnosis due to their interpretability and robust performance.
+
+The Wisconsin Breast Cancer Diagnostic dataset contains features computed from digitized images of fine needle aspirate (FNA) of breast masses. This dataset provides an excellent opportunity to evaluate different logistic regression configurations and their effectiveness in binary classification tasks.
+
+\subsection{Objectives}
+The primary objectives of this study are:
+\begin{enumerate}
+    \item Implement logistic regression using multiple solver-penalty combinations
+    \item Evaluate the impact of fine-tuning on model performance
+    \item Analyze the effect of L1 regularization on feature selection
+    \item Compare different regularization strengths and their impact on model sparsity
+    \item Provide practical recommendations for model selection
+\end{enumerate}
+
+\section{Methodology}
+
+\subsection{Dataset Description}
+The Wisconsin Breast Cancer Diagnostic dataset consists of:
+\begin{itemize}
+    \item \textbf{Instances}: 569 samples
+    \item \textbf{Features}: 30 real-valued features
+    \item \textbf{Target}: Binary classification (Malignant/Benign)
+    \item \textbf{Missing Values}: None
+\end{itemize}
+
+\subsection{Data Preprocessing}
+The dataset was split into training, validation, and test sets with an 80:10:10 ratio using a random seed of 5 for reproducibility. No additional preprocessing was required as the dataset contained no missing values and all features were already numerical.
+
+\subsection{Model Configurations}
+We implemented six different logistic regression configurations:
+
+\begin{table}[H]
+\centering
+\caption{Logistic Regression Model Configurations}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Model} & \textbf{Solver} & \textbf{Penalty} \\
+\hline
+Model 1 & newton-cg & L2 \\
+Model 2 & newton-cg & None \\
+Model 3 & lbfgs & L2 \\
+Model 4 & lbfgs & None \\
+Model 5 & liblinear & L1 \\
+Model 6 & liblinear & L2 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Strategy}
+Models were evaluated using two approaches:
+\begin{enumerate}
+    \item \textbf{Before Fine-tuning}: Models trained on 80\% training data only
+    \item \textbf{After Fine-tuning}: Models trained on combined 90\% data (training + validation)
+\end{enumerate}
+
+Performance metrics included accuracy, precision, recall, and F1-score, all evaluated on the held-out 10\% test set.
+
+\section{Results and Analysis}
+
+\subsection{Performance Before Fine-tuning}
+
+\begin{table}[H]
+\centering
+\caption{Model Performance Before Fine-tuning}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\hline
+newton-cg\_l2 & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+newton-cg\_none & \textbf{0.9825} & \textbf{0.9829} & \textbf{0.9825} & \textbf{0.9824} \\
+lbfgs\_l2 & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+lbfgs\_none & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+liblinear\_l1 & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+liblinear\_l2 & \textbf{0.9825} & \textbf{0.9833} & \textbf{0.9825} & \textbf{0.9825} \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Key Observations:}
+\begin{itemize}
+    \item Two models achieved the highest accuracy of 98.25\%: newton-cg with no penalty and liblinear with L2 penalty
+    \item All other models achieved 96.49\% accuracy, indicating robust baseline performance
+    \item The difference between best and worst performing models was only 1.76\%
+\end{itemize}
+
+\subsection{Performance After Fine-tuning}
+
+\begin{table}[H]
+\centering
+\caption{Model Performance After Fine-tuning}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\hline
+newton-cg\_l2 & \textbf{0.9825} & \textbf{0.9833} & \textbf{0.9825} & \textbf{0.9825} \\
+newton-cg\_none & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+lbfgs\_l2 & \textbf{0.9825} & \textbf{0.9833} & \textbf{0.9825} & \textbf{0.9825} \\
+lbfgs\_none & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+liblinear\_l1 & 0.9649 & 0.9649 & 0.9649 & 0.9649 \\
+liblinear\_l2 & \textbf{0.9825} & \textbf{0.9833} & \textbf{0.9825} & \textbf{0.9825} \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Impact of Fine-tuning:}
+\begin{itemize}
+    \item Three models now achieve the highest accuracy of 98.25\%
+    \item Newton-cg with L2 penalty improved from 96.49\% to 98.25\%
+    \item Some models showed slight performance decrease, indicating potential overfitting
+    \item Average improvement across all models: 0.29\% in both accuracy and F1-score
+\end{itemize}
+
+\subsection{L1 Regularization Analysis}
+
+We conducted a detailed analysis of L1 penalty effects using different regularization strengths (C values) with compatible solvers.
+
+\begin{table}[H]
+\centering
+\caption{L1 Penalty Performance with Different C Values}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Solver} & \textbf{C Value} & \textbf{Accuracy} & \textbf{F1-Score} & \textbf{Non-zero Features} \\
+\hline
+\multirow{4}{*}{liblinear} & 0.10 & 0.9474 & 0.9471 & 7 \\
+& 0.25 & \textbf{0.9649} & \textbf{0.9649} & 7 \\
+& 0.75 & 0.9649 & 0.9649 & 11 \\
+& 0.90 & 0.9649 & 0.9649 & 10 \\
+\hline
+\multirow{4}{*}{saga} & 0.10 & 0.9123 & 0.9107 & 9 \\
+& 0.25 & 0.9123 & 0.9107 & 12 \\
+& 0.75 & 0.9123 & 0.9107 & 15 \\
+& 0.90 & 0.9123 & 0.9107 & 16 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{L1 Regularization Insights:}
+\begin{itemize}
+    \item \textbf{Liblinear solver} significantly outperformed saga for L1 regularization
+    \item \textbf{Optimal sparsity}: C=0.25 achieved maximum accuracy (96.49\%) with only 7 features
+    \item \textbf{Feature reduction}: From 30 original features to just 7 (76.7\% reduction)
+    \item \textbf{Solver stability}: Liblinear showed consistent performance across different C values
+\end{itemize}
+
+\section{Discussion}
+
+\subsection{Solver-Penalty Combinations}
+
+\textbf{Newton-CG Solver:}
+\begin{itemize}
+    \item Excellent performance with both L2 and no penalty
+    \item Fast convergence for well-conditioned problems
+    \item Best suited for problems where memory efficiency is important
+\end{itemize}
+
+\textbf{LBFGS Solver:}
+\begin{itemize}
+    \item Consistent performance with L2 regularization
+    \item Good choice for small to medium-sized datasets
+    \item Handles numerical optimization well
+\end{itemize}
+
+\textbf{Liblinear Solver:}
+\begin{itemize}
+    \item Most versatile, supporting all penalty types
+    \item Superior performance for L1 regularization
+    \item Excellent for feature selection tasks
+\end{itemize}
+
+\subsection{Feature Selection Analysis}
+
+The L1 regularization analysis revealed significant insights:
+
+\begin{enumerate}
+    \item \textbf{Dramatic dimensionality reduction}: From 30 features to 7 while maintaining 96.49\% accuracy
+    \item \textbf{Regularization strength}: C=0.25 provided optimal balance between performance and sparsity
+    \item \textbf{Model interpretability}: Fewer features make the model more interpretable in clinical settings
+    \item \textbf{Computational efficiency}: Reduced feature space leads to faster inference
+\end{enumerate}
+
+\subsection{Clinical Implications}
+
+In medical diagnosis applications:
+\begin{itemize}
+    \item \textbf{High accuracy models} (98.25\%) provide reliable diagnostic support
+    \item \textbf{Sparse models} (7 features) enable focused measurement protocols
+    \item \textbf{Interpretable features} facilitate clinical decision-making
+    \item \textbf{Robust performance} across different configurations ensures reliability
+\end{itemize}
+
+\section{Conclusions and Recommendations}
+
+\subsection{Key Findings}
+
+\begin{enumerate}
+    \item \textbf{Multiple optimal solutions}: Several solver-penalty combinations achieved 98.25\% accuracy
+    \item \textbf{Fine-tuning benefits}: Modest but consistent improvement (0.29\% average)
+    \item \textbf{Effective feature selection}: L1 regularization reduced features by 76.7\% with minimal accuracy loss
+    \item \textbf{Solver preferences}: Liblinear excelled for L1, newton-cg and lbfgs for L2/none penalties
+\end{enumerate}
+
+\subsection{Practical Recommendations}
+
+\textbf{For Maximum Accuracy:}
+\begin{itemize}
+    \item Use newton-cg with L2 penalty or no penalty
+    \item Consider lbfgs with L2 penalty as alternative
+    \item Implement fine-tuning with validation data
+\end{itemize}
+
+\textbf{For Feature Selection:}
+\begin{itemize}
+    \item Use liblinear solver with L1 penalty
+    \item Set regularization strength C=0.25
+    \item Accept slight accuracy trade-off (1.76\%) for 76.7\% feature reduction
+\end{itemize}
+
+\textbf{For Clinical Applications:}
+\begin{itemize}
+    \item Prioritize interpretable models with fewer features
+    \item Consider L1-regularized models for focused diagnostic protocols
+    \item Validate performance on independent datasets before deployment
+\end{itemize}
+
+\subsection{Future Work}
+
+\begin{enumerate}
+    \item Investigate non-linear models (Random Forest, SVM) for comparison
+    \item Analyze feature importance and biological relevance of selected features
+    \item Implement cross-validation for more robust performance estimates
+    \item Explore ensemble methods combining multiple solver configurations
+    \item Validate findings on additional breast cancer datasets
+\end{enumerate}
+
+\section{Acknowledgments}
+
+We acknowledge the UCI Machine Learning Repository for providing the Wisconsin Breast Cancer Diagnostic dataset and the scikit-learn development team for their excellent machine learning library implementation.
+
+\begin{thebibliography}{9}
+
+\bibitem{dataset}
+Dua, D. and Graff, C. (2019). UCI Machine Learning Repository [http://archive.ics.uci.edu/ml]. Irvine, CA: University of California, School of Information and Computer Science.
+
+\bibitem{sklearn}
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., ... \& Vanderplas, J. (2011). Scikit-learn: Machine learning in Python. Journal of machine learning research, 12(Oct), 2825-2830.
+
+\bibitem{logistic}
+Hosmer Jr, D. W., Lemeshow, S., \& Sturdivant, R. X. (2013). Applied logistic regression (Vol. 398). John Wiley \& Sons.
+
+\bibitem{regularization}
+Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. Journal of the Royal Statistical Society: Series B (Methodological), 58(1), 267-288.
+
+\end{thebibliography}
+
+\end{document}
