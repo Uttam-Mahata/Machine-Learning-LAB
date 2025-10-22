@@ -397,6 +397,6 @@ For questions or collaborations related to this repository, please open an issue
 
 ---
 
-**Last Updated**: October 2024
+**Last Updated**: October 2025
 
 **Repository**: [https://github.com/Uttam-Mahata/Machine-Learning-LAB](https://github.com/Uttam-Mahata/Machine-Learning-LAB)
