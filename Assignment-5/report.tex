@@ -1,0 +1,664 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{array}
+
+\title{\textbf{Assignment 5: Flower Classification using Convolutional Neural Networks}\\
+\large Comprehensive Hyperparameter Analysis and Comparison with MNIST}
+\author{Uttam Mahata (2022CSB104) }
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\newpage
+
+\section{Introduction}
+
+
+% \subsection{Objectives}
+% The primary objectives of this assignment are:
+% \begin{enumerate}
+%     \item Implement a CNN-based flower classification system
+%     \item Systematically analyze the impact of different hyperparameters on model performance
+%     \item Compare performance across multiple experimental configurations
+%     \item Evaluate the transferability of optimal configurations to the MNIST dataset
+%     \item Analyze the relationship between model complexity, training time, and accuracy
+% \end{enumerate}
+
+\subsection{Dataset Description}
+The flower dataset consists of five classes:
+\begin{itemize}
+    \item \textbf{Daisy}: Natural variations in petal arrangement and color
+    \item \textbf{Dandelion}: Yellow flowers with distinctive radial symmetry
+    \item \textbf{Rose}: Complex petal structures with varying colors
+    \item \textbf{Sunflower}: Large flowers with characteristic patterns
+    \item \textbf{Tulip}: Cup-shaped flowers with smooth petals
+\end{itemize}
+
+All images are preprocessed to 80×80 pixels and converted to grayscale (except Experiment G which uses RGB). The dataset is split into 90\% training and 10\% testing sets with stratified sampling to maintain class distribution.
+
+\section{Methodology}
+
+\subsection{Data Preprocessing}
+The preprocessing pipeline consists of the following steps:
+\begin{enumerate}
+    \item \textbf{Image Loading}: Images are read from the directory structure
+    \item \textbf{Resizing}: All images are resized to 80×80 pixels using bilinear interpolation
+    \item \textbf{Grayscale Conversion}: Images are converted to grayscale using OpenCV (except Experiment G)
+    \item \textbf{Normalization}: Pixel values are normalized to [0, 1] range by dividing by 255
+    \item \textbf{Reshaping}: Grayscale images are reshaped to (80, 80, 1) for CNN input
+\end{enumerate}
+
+\subsection{CNN Architecture Framework}
+We designed a flexible CNN architecture that allows systematic variation of hyperparameters:
+
+\begin{verbatim}
+Input (80×80×1 or 80×80×3)
+    ↓
+[Convolution Layer → Activation → Pooling → Dropout] × N
+    ↓
+Flatten
+    ↓
+[Fully Connected → Activation → Dropout] × M
+    ↓
+Output (5 classes for flowers, 10 for MNIST)
+\end{verbatim}
+
+\subsection{Training Configuration}
+\begin{itemize}
+    \item \textbf{Optimizer}: Adam with default learning rate (0.001)
+    \item \textbf{Loss Function}: Categorical Cross-Entropy
+    \item \textbf{Batch Size}: 32
+    \item \textbf{Epochs}: 16
+    \item \textbf{Validation Split}: 10\% of training data
+    \item \textbf{Metrics}: Accuracy, F1 Score (weighted)
+\end{itemize}
+
+\subsection{Evaluation Metrics}
+We evaluate models using the following metrics:
+\begin{itemize}
+    \item \textbf{Test Accuracy}: Percentage of correctly classified samples
+    \item \textbf{F1 Score}: Weighted harmonic mean of precision and recall
+    \item \textbf{Training Time}: Total time required to train the model
+    \item \textbf{Trainable Parameters}: Number of learnable parameters in the model
+    \item \textbf{Confusion Matrix}: Visual representation of classification performance
+\end{itemize}
+
+\section{Experimental Design}
+
+\subsection{Experiment A: Convolution Kernel Size Analysis}
+\textbf{Objective}: Determine the optimal kernel size configuration for the three convolutional layers.
+
+\textbf{Fixed Parameters}:
+\begin{itemize}
+    \item Filters: [16, 32, 64]
+    \item Pooling: Max Pooling (2×2)
+    \item Activation: ReLU
+    \item FC Layers: 1
+    \item Dropout: 0.1
+\end{itemize}
+
+\textbf{Variable Parameters}:
+\begin{table}[H]
+\centering
+\caption{Experiment A: Kernel Size Configurations}
+\begin{tabular}{lc}
+\toprule
+\textbf{Experiment} & \textbf{Kernel Sizes} \\
+\midrule
+A1 & (3×3, 3×3, 3×3) \\
+A2 & (3×3, 3×3, 5×5) \\
+A3 & (3×3, 5×5, 5×5) \\
+A4 & (5×5, 5×5, 5×5) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Experiment B: Fully Connected Layers}
+\textbf{Objective}: Analyze the impact of adding more fully connected layers.
+
+\textbf{Configuration}: Uses the best kernel configuration from Experiment A.
+
+\textbf{Variable Parameters}:
+\begin{table}[H]
+\centering
+\caption{Experiment B: Number of FC Layers}
+\begin{tabular}{lc}
+\toprule
+\textbf{Experiment} & \textbf{Number of FC Layers} \\
+\midrule
+B1 & 2 \\
+B2 & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Experiment C: Pooling Type Comparison}
+\textbf{Objective}: Compare Average Pooling with Max Pooling.
+
+\textbf{Configuration}: Uses optimal settings from Experiments A and B.
+
+\subsection{Experiment D: Activation Function Analysis}
+\textbf{Objective}: Compare different activation functions.
+
+\textbf{Variable Parameters}:
+\begin{table}[H]
+\centering
+\caption{Experiment D: Activation Functions}
+\begin{tabular}{ll}
+\toprule
+\textbf{Experiment} & \textbf{Activation Function} \\
+\midrule
+D1 & Sigmoid \\
+D2 & ReLU \\
+D3 & Leaky ReLU (α=0.01) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Experiment E: Regularization Techniques}
+\textbf{Objective}: Evaluate different regularization approaches to prevent overfitting.
+
+\textbf{Variable Parameters}:
+\begin{table}[H]
+\centering
+\caption{Experiment E: Regularization Techniques}
+\begin{tabular}{ll}
+\toprule
+\textbf{Experiment} & \textbf{Regularization} \\
+\midrule
+E1 & Dropout (0.25) \\
+E2 & Batch Normalization \\
+E3 & Dropout (0.1) + Batch Normalization \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Experiment F: Network Depth Analysis}
+\textbf{Objective}: Analyze the relationship between network depth, trainable parameters, and performance.
+
+\textbf{Variable Parameters}:
+\begin{table}[H]
+\centering
+\caption{Experiment F: Additional Convolution Layers}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Experiment} & \textbf{Conv Layers} & \textbf{Filters} \\
+\midrule
+F1 & 4 (base + 1) & [16, 32, 64, 128] \\
+F2 & 5 (base + 2) & [16, 32, 64, 128, 256] \\
+F3 & 6 (base + 3) & [16, 32, 64, 128, 256, 512] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Experiment G: Color Image Processing}
+\textbf{Objective}: Compare grayscale vs. RGB color processing using the best model configuration.
+
+\textbf{Configuration}: Uses RGB images (80×80×3) with the optimal architecture from previous experiments.
+
+\subsection{MNIST Comparison}
+\textbf{Objective}: Evaluate the transferability of the best flower classification architecture to MNIST digit classification.
+
+\textbf{Configuration}: 
+\begin{itemize}
+    \item MNIST images resized to 80×80
+    \item Grayscale format maintained
+    \item Same CNN architecture as best flower model
+    \item 10 output classes (digits 0-9)
+\end{itemize}
+
+\section{Results and Analysis}
+
+\subsection{Overall Performance Summary}
+
+\begin{table}[H]
+\centering
+\caption{Comprehensive Results for All Experiments}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Experiment} & \textbf{Test Acc.} & \textbf{F1 Score} & \textbf{Time (s)} & \textbf{Parameters} \\
+\midrule
+A1: (3×3, 3×3, 3×3) & 0.5509 & 0.5503 & 15.11 & 843,269 \\
+A2: (3×3, 3×3, 5×5) & 0.4769 & 0.4755 & 15.98 & 876,037 \\
+A3: (3×3, 5×5, 5×5) & 0.5370 & 0.5336 & 15.92 & 884,229 \\
+A4: (5×5, 5×5, 5×5) & 0.5231 & 0.5174 & 16.23 & 884,485 \\
+\midrule
+B1: 2 FC Layers & 0.4884 & 0.4890 & 16.60 & 851,205 \\
+B2: 3 FC Layers & 0.5023 & 0.5016 & 16.50 & 855,365 \\
+\midrule
+C1: Avg Pooling & 0.4792 & 0.4693 & 15.31 & 843,269 \\
+\midrule
+D1: Sigmoid & 0.2431 & 0.0951 & 15.07 & 843,269 \\
+D2: ReLU & 0.5347 & 0.5361 & 14.80 & 843,269 \\
+D3: Leaky ReLU & 0.5324 & 0.5261 & 14.81 & 843,269 \\
+\midrule
+E1: Dropout 0.25 & 0.4838 & 0.4808 & 15.10 & 843,269 \\
+E2: Batch Norm & 0.2778 & 0.1752 & 15.94 & 843,653 \\
+E3: Both & 0.2708 & 0.1522 & 17.16 & 843,653 \\
+\midrule
+F1: 4 Conv Layers & 0.5995 & 0.6008 & 17.03 & 507,525 \\
+F2: 5 Conv Layers & 0.5972 & 0.5916 & 19.45 & 524,165 \\
+F3: 6 Conv Layers & 0.4861 & 0.4949 & 20.43 & 1,638,789 \\
+\midrule
+G1: Color Images & \textbf{0.7014} & \textbf{0.6987} & 16.44 & 843,557 \\
+\midrule
+MNIST Model & \textbf{0.9910} & \textbf{0.9910} & 225.05 & 843,914 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Observations:}
+\begin{itemize}
+    \item Best flower classification performance achieved with RGB color images (70.14\% accuracy)
+    \item MNIST achieved exceptional performance (99.10\% accuracy) with the same architecture
+    \item Sigmoid activation performed poorly (24.31\% accuracy), confirming gradient issues
+    \item Deeper networks (F1, F2) outperformed baseline but F3 showed overfitting
+\end{itemize}
+
+\subsection{Experiment A: Kernel Size Analysis}
+
+\subsubsection{Results}
+The kernel size experiments revealed the impact of receptive field size on feature extraction:
+
+\begin{itemize}
+    \item \textbf{A1 (3×3, 3×3, 3×3)}: \textbf{55.09\% accuracy} - Best performing kernel configuration
+    \item \textbf{A2 (3×3, 3×3, 5×5)}: 47.69\% accuracy - Hybrid approach underperformed
+    \item \textbf{A3 (3×3, 5×5, 5×5)}: 53.70\% accuracy - Larger kernels in deeper layers
+    \item \textbf{A4 (5×5, 5×5, 5×5)}: 52.31\% accuracy - Consistently large receptive fields
+\end{itemize}
+
+\subsubsection{Analysis}
+\begin{enumerate}
+    \item \textbf{A1 achieved the best performance} with smallest kernels (3×3) throughout, demonstrating that fine-grained feature extraction is more effective for 80×80 flower images
+    \item Smaller kernels have fewer parameters (843,269 vs 884,485 for A4) and comparable training time (15.11s vs 16.23s)
+    \item Larger kernels (5×5) did not provide significant benefits, likely because the input images are relatively small (80×80)
+    \item The optimal configuration uses consistent 3×3 kernels, balancing feature extraction with model efficiency
+    \item A1 selected as baseline for subsequent experiments B-E
+\end{enumerate}
+
+\subsection{Experiment B: Fully Connected Layers}
+
+\subsubsection{Results}
+Adding more fully connected layers affects the model's ability to learn complex decision boundaries:
+
+\begin{itemize}
+    \item \textbf{B1 (2 FC Layers)}: 48.84\% accuracy, 851,205 parameters
+    \item \textbf{B2 (3 FC Layers)}: 50.23\% accuracy, 855,365 parameters
+    \item \textbf{Baseline (1 FC Layer - A1)}: 55.09\% accuracy, 843,269 parameters
+\end{itemize}
+
+\subsubsection{Analysis}
+\begin{itemize}
+    \item Surprisingly, adding more FC layers \textbf{decreased performance} compared to baseline
+    \item The baseline with 1 FC layer achieved 55.09\%, while 2 and 3 FC layers achieved only 48.84\% and 50.23\% respectively
+    \item Additional FC layers increased parameter count (8,000-12,000 more parameters)
+    \item Training time increased slightly (16.60s and 16.50s vs 15.11s for baseline)
+    \item For this relatively simple 5-class problem, a single FC layer provides sufficient capacity
+    \item More FC layers may cause overfitting on the limited training data (3,885 samples)
+    \item \textbf{Conclusion}: 1 FC layer (baseline) is optimal for this task
+\end{itemize}
+
+\subsection{Experiment C: Pooling Type}
+
+\subsubsection{Results}
+Comparison between Max Pooling and Average Pooling:
+
+\begin{itemize}
+    \item \textbf{Max Pooling (Baseline - A1)}: 55.09\% accuracy
+    \item \textbf{Average Pooling (C1)}: 47.92\% accuracy
+\end{itemize}
+
+\subsubsection{Analysis}
+\begin{itemize}
+    \item \textbf{Max Pooling significantly outperformed Average Pooling} (7.17 percentage points higher)
+    \item Max Pooling preserves dominant features and provides better translation invariance for classification
+    \item Average Pooling smooths features, which may lose important discriminative information needed to distinguish flower types
+    \item Both methods have identical parameter counts (843,269) and similar training times (15.11s vs 15.31s)
+    \item Max pooling is generally superior for classification tasks where distinctive features matter
+    \item The performance gap confirms that preserving maximum activations is crucial for flower identification
+\end{itemize}
+
+\subsection{Experiment D: Activation Functions}
+
+\subsubsection{Results}
+Different activation functions affect gradient flow and learning dynamics:
+
+\begin{itemize}
+    \item \textbf{D1 (Sigmoid)}: 24.31\% accuracy, F1: 0.0951 - \textcolor{red}{Severely underperformed}
+    \item \textbf{D2 (ReLU)}: 53.47\% accuracy, F1: 0.5361 - Best among activations
+    \item \textbf{D3 (Leaky ReLU)}: 53.24\% accuracy, F1: 0.5261 - Comparable to ReLU
+    \item \textbf{Baseline (ReLU - A1)}: 55.09\% accuracy
+\end{itemize}
+
+\subsubsection{Analysis}
+\begin{itemize}
+    \item \textbf{Sigmoid activation failed catastrophically} with only 24.31\% accuracy (worse than random guessing at 20\%)
+    \item Extremely low F1 score (0.0951) indicates sigmoid model barely learned to classify
+    \item Sigmoid suffers from severe \textbf{vanishing gradient problem} in this 3-layer CNN
+    \item \textbf{ReLU and Leaky ReLU performed comparably} (53.47\% vs 53.24\%), both much better than Sigmoid
+    \item ReLU provides efficient computation and effective gradient flow
+    \item Leaky ReLU (α=0.01) addresses dying neuron problem but showed no significant advantage here
+    \item All activation functions have identical parameters (843,269) and similar training times (~15s)
+    \item \textbf{ReLU is the clear choice} for this architecture, avoiding vanishing gradients while maintaining simplicity
+\end{itemize}
+
+\subsection{Experiment E: Regularization Techniques}
+
+\subsubsection{Results}
+Regularization methods prevent overfitting and improve generalization:
+
+\begin{itemize}
+    \item \textbf{E1 (Dropout 0.25)}: 48.38\% accuracy, F1: 0.4808
+    \item \textbf{E2 (Batch Normalization)}: 27.78\% accuracy, F1: 0.1752 - \textcolor{red}{Failed to converge}
+    \item \textbf{E3 (Dropout 0.1 + Batch Norm)}: 27.08\% accuracy, F1: 0.1522 - \textcolor{red}{Worst performance}
+    \item \textbf{Baseline (Dropout 0.1 - A1)}: 55.09\% accuracy
+\end{itemize}
+
+\subsubsection{Analysis}
+\begin{itemize}
+    \item \textbf{Baseline dropout (0.1) performed best} at 55.09\% accuracy
+    \item \textbf{Increasing dropout to 0.25} reduced accuracy to 48.38\%, indicating over-regularization
+    \item Stronger dropout may have prevented the model from learning sufficient features from limited data
+    \item \textbf{Batch Normalization alone performed very poorly} (27.78\%), suggesting instability or improper initialization
+    \item \textbf{Combined approach (E3) was worst} at 27.08\%, showing that adding both techniques caused severe training issues
+    \item E3 had longest training time (17.16s) due to additional batch norm computations
+    \item Batch normalization increased parameters slightly (843,653 vs 843,269)
+    \item \textbf{Key finding}: For this small dataset (3,885 samples), light dropout (0.1) is sufficient
+    \item Batch normalization may require careful tuning or more training epochs to be effective
+    \item Over-regularization is detrimental when data is limited
+\end{itemize}
+
+\subsection{Experiment F: Network Depth}
+
+\subsubsection{Results}
+Analysis of trainable parameters vs. performance:
+
+\begin{table}[H]
+\centering
+\caption{Network Depth Comparison}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Experiment} & \textbf{Parameters} & \textbf{Time (s)} & \textbf{Accuracy} \\
+\midrule
+Baseline (3 Conv) & 843,269 & 15.11 & 55.09\% \\
+F1: 4 Conv Layers & 507,525 & 17.03 & \textbf{59.95\%} \\
+F2: 5 Conv Layers & 524,165 & 19.45 & 59.72\% \\
+F3: 6 Conv Layers & 1,638,789 & 20.43 & 48.61\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Analysis}
+\begin{itemize}
+    \item \textbf{F1 (4 conv layers) achieved best performance} at 59.95\% accuracy, improving 4.86 percentage points over baseline
+    \item \textbf{F1 has fewer parameters (507,525) than baseline (843,269)} due to earlier dimensionality reduction
+    \item F2 (5 layers) performed nearly as well (59.72\%) with slightly more parameters (524,165)
+    \item \textbf{F3 (6 layers) showed severe overfitting}, dropping to 48.61\% despite having 1.64M parameters (3× more than baseline)
+    \item Training time increases with depth: 17.03s → 19.45s → 20.43s (13-35\% increase over baseline)
+    \item \textbf{Deeper is not always better}: F3's massive parameter count led to overfitting on small dataset
+    \item \textbf{Sweet spot}: 4-5 convolutional layers provide optimal balance
+    \item Parameter explosion in F3 (128→256→512 filters) overwhelmed the 3,885 training samples
+    \item Diminishing returns observed: F1→F2 improvement marginal (0.23\%), F2→F3 sharp decline (11.11\%)
+\end{itemize}
+
+\subsection{Experiment G: Color vs. Grayscale}
+
+\subsubsection{Results}
+Comparison of color (RGB) and grayscale image processing:
+
+\begin{itemize}
+    \item \textbf{G1 (RGB Color Images)}: \textbf{70.14\% accuracy}, F1: 0.6987, Parameters: 843,557
+    \item \textbf{Baseline (Grayscale - A1)}: 55.09\% accuracy, F1: 0.5503, Parameters: 843,269
+    \item \textbf{Improvement}: +15.05 percentage points (+27.3\% relative improvement)
+\end{itemize}
+
+\subsubsection{Analysis}
+\begin{itemize}
+    \item \textbf{Color images dramatically improved performance}, achieving 70.14\% vs 55.09\% for grayscale
+    \item This represents the \textbf{single largest performance gain} across all experiments
+    \item RGB models have 3 input channels vs 1, increasing first conv layer parameters slightly (448 vs 160)
+    \item Total parameters increased minimally (843,557 vs 843,269), only 288 additional parameters
+    \item Training time remained comparable (16.44s vs 15.11s), only 1.33s increase
+    \item \textbf{Color is crucial for flower classification}: hue, saturation distinguish flower types
+    \item Different flowers have characteristic colors: yellow dandelions, red/pink roses, etc.
+    \item F1 score improved from 0.5503 to 0.6987, indicating better balanced classification
+    \item \textbf{G1 achieved the best performance among all flower classification experiments}
+    \item The minimal parameter increase shows efficiency of learning from color information
+    \item Grayscale discards critical discriminative information for this task
+\end{itemize}
+
+\subsection{MNIST Comparison}
+
+\subsubsection{Results}
+Transfer of best flower model architecture to MNIST:
+
+\begin{table}[H]
+\centering
+\caption{Flower vs. MNIST Performance}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Dataset} & \textbf{Classes} & \textbf{Test Acc.} & \textbf{F1 Score} & \textbf{Training Time} \\
+\midrule
+Flowers (Best - G1) & 5 & 70.14\% & 0.6987 & 16.44s \\
+MNIST & 10 & \textbf{99.10\%} & \textbf{0.9910} & 225.05s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Analysis}
+\begin{itemize}
+    \item \textbf{MNIST achieved exceptional 99.10\% accuracy}, significantly higher than flowers (70.14\%)
+    \item Perfect F1 score (0.9910) indicates excellent balanced performance across all 10 digits
+    \item Training time was much longer (225.05s vs 16.44s) due to larger dataset:
+    \begin{itemize}
+        \item MNIST: 60,000 training samples
+        \item Flowers: 3,885 training samples (15.4× smaller)
+    \end{itemize}
+    \item Similar parameter count (843,914 vs 843,557), differing only in output layer (10 vs 5 classes)
+    \item \textbf{MNIST is inherently easier} than flower classification:
+    \begin{itemize}
+        \item Less intra-class variation (digits are standardized)
+        \item More distinct inter-class boundaries
+        \item Simpler visual patterns (strokes vs complex textures)
+        \item Much larger training set enables better generalization
+        \item Centered, normalized digit images vs varied flower compositions
+    \end{itemize}
+    \item Architecture designed for flowers transfers well to MNIST
+    \item The 3×3 kernel configuration effectively captures both fine flower details and digit strokes
+    \item \textbf{Key insight}: Same architecture performs vastly differently based on task complexity and data availability
+    \item MNIST's 99.10\% demonstrates architecture is fundamentally sound
+    \item Flower classification's 70.14\% reflects inherent task difficulty, not architectural limitation
+\end{itemize}
+
+\section{Key Findings}
+
+\subsection{Hyperparameter Insights}
+\begin{enumerate}
+    \item \textbf{Kernel Size}: 3×3 kernels consistently throughout all conv layers (A1) achieved best grayscale performance (55.09\%). Larger kernels (5×5) did not improve accuracy for 80×80 images.
+    
+    \item \textbf{Network Depth}: 4 convolutional layers (F1) achieved optimal performance (59.95\%) with fewer parameters than baseline. Adding more layers (F3 with 6 layers) caused severe overfitting (48.61\%) despite 3× more parameters.
+    
+    \item \textbf{Activation}: ReLU (53.47\%) and Leaky ReLU (53.24\%) performed comparably well. Sigmoid catastrophically failed (24.31\%) due to vanishing gradients. \textbf{ReLU is the clear choice.}
+    
+    \item \textbf{Regularization}: Light dropout (0.1) optimal for this dataset. Stronger dropout (0.25) reduced accuracy to 48.38\%. Batch normalization alone (27.78\%) or combined with dropout (27.08\%) failed to converge properly.
+    
+    \item \textbf{Pooling}: Max pooling (55.09\%) significantly outperformed average pooling (47.92\%) by 7.17 percentage points. Max pooling better preserves discriminative features.
+    
+    \item \textbf{Color vs. Grayscale}: RGB color images (70.14\%) dramatically outperformed grayscale (55.09\%), improving by 15.05 percentage points. This was the \textbf{single most impactful change}, demonstrating color is crucial for flower identification.
+    
+    \item \textbf{FC Layers}: Single fully connected layer (55.09\%) performed best. Adding more FC layers (2 or 3) reduced accuracy to 48-50\%, indicating over-parameterization for this simple 5-class problem.
+\end{enumerate}
+
+\subsection{Model Complexity vs. Performance}
+\begin{itemize}
+    \item \textbf{Diminishing returns} clearly observed: F1 (4 conv) achieved 59.95\% with 507K params, F2 (5 conv) only marginally improved to 59.72\% with 524K params
+    \item \textbf{Over-parameterization harmful}: F3 with 1.64M parameters (3× baseline) severely overfitted, achieving only 48.61\%
+    \item \textbf{Sweet spot exists}: Best grayscale model (F1) actually had fewer parameters than baseline but better feature extraction
+    \item \textbf{Training time scales with depth}: 15s (3 conv) → 17s (4 conv) → 19s (5 conv) → 20s (6 conv)
+    \item \textbf{Parameter count ≠ performance}: E2 and E3 with batch norm had similar parameters to baseline but performed terribly (27-28\%)
+    \item For small datasets (3,885 samples), simpler models with proper architecture design outperform complex over-parameterized models
+\end{itemize}
+
+\subsection{Dataset-Specific Observations}
+\begin{itemize}
+    \item \textbf{Color information is critical for flowers}: 70.14\% (RGB) vs 55.09\% (grayscale) = 27.3\% relative improvement
+    \item Minimal parameter increase (288 params) for color yielded maximum performance gain
+    \item \textbf{Flower classification is complex}: Best model 70.14\% vs MNIST 99.10\% with same architecture
+    \item High intra-class variation in flowers (different angles, lighting, backgrounds)
+    \item Limited training data (3,885 samples) constrains what can be learned
+    \item \textbf{MNIST benefits from}: 15× more training data, simpler patterns, less variation
+    \item Architecture transferability confirmed: same design works for both tasks, performance reflects task difficulty
+\end{itemize}
+
+\section{Confusion Matrix Analysis}
+
+Based on the experimental results, we can identify patterns in model performance:
+
+\subsection{Performance Rankings}
+\textbf{Top 5 Best Performing Experiments:}
+\begin{enumerate}
+    \item \textbf{MNIST}: 99.10\% (different task, not directly comparable)
+    \item \textbf{G1 (Color Images)}: 70.14\% - Best flower classification
+    \item \textbf{F1 (4 Conv Layers)}: 59.95\% - Best grayscale configuration
+    \item \textbf{F2 (5 Conv Layers)}: 59.72\% - Marginally behind F1
+    \item \textbf{A1 (3×3 kernels)}: 55.09\% - Best baseline
+\end{enumerate}
+
+\textbf{Bottom 5 Worst Performing Experiments:}
+\begin{enumerate}
+    \item \textbf{D1 (Sigmoid)}: 24.31\% - Complete failure
+    \item \textbf{E3 (Dropout + BN)}: 27.08\% - Severe convergence issues
+    \item \textbf{E2 (Batch Norm)}: 27.78\% - Failed to train properly
+    \item \textbf{A2 (Hybrid kernels)}: 47.69\% - Worst kernel configuration
+    \item \textbf{C1 (Avg Pooling)}: 47.92\% - Pooling type matters
+\end{enumerate}
+
+\subsection{Common Patterns}
+\begin{itemize}
+    \item Models with ReLU activation consistently performed in mid-to-high 50\% range
+    \item Batch normalization experiments (E2, E3) both failed, suggesting implementation or tuning issues
+    \item Increasing regularization strength generally decreased performance on this small dataset
+    \item Best performance always used: 3×3 kernels, ReLU, max pooling, light dropout (0.1)
+\end{itemize}
+
+\section{Discussion}
+
+\subsection{Advantages of the Approach}
+\begin{enumerate}
+    \item \textbf{Systematic exploration}: 16+ experiments covering all major hyperparameters
+    \item \textbf{Comprehensive metrics}: Accuracy, F1 score, training time, and parameter counts
+    \item \textbf{Fair comparison}: Consistent training setup (16 epochs, batch size 32, Adam optimizer)
+    \item \textbf{Transferability testing}: MNIST comparison validates architecture design
+    \item \textbf{Clear insights}: Identified optimal configuration and failure modes
+    \item \textbf{Reproducible}: Fixed random seeds, documented configurations
+\end{enumerate}
+
+\subsection{Limitations}
+\begin{enumerate}
+    \item \textbf{Limited epochs}: Only 16 epochs may not reach full convergence for all models
+    \item \textbf{No data augmentation}: Could improve generalization, especially for flowers
+    \item \textbf{Fixed image size}: 80×80 may lose important details present in original images
+    \item \textbf{No learning rate scheduling}: Fixed learning rate throughout training
+    \item \textbf{Single train-test split}: No cross-validation for more robust estimates
+    \item \textbf{Small dataset}: 4,317 total images limits model complexity
+    \item \textbf{Batch norm issues}: May need more epochs or careful tuning to work properly
+    \item \textbf{No hyperparameter optimization}: Manual selection rather than grid/random search
+\end{enumerate}
+
+\subsection{Potential Improvements}
+\begin{enumerate}
+    \item \textbf{Data Augmentation}: Rotation, flipping, zooming, color jittering to increase effective dataset size and improve robustness
+    
+    \item \textbf{Learning Rate Scheduling}: Cosine annealing or reduce-on-plateau could improve convergence and final accuracy
+    
+    \item \textbf{Transfer Learning}: Use pre-trained models (VGG16, ResNet50, EfficientNet) as feature extractors, likely to achieve 85-90\% accuracy
+    
+    \item \textbf{Ensemble Methods}: Combine predictions from top models (G1, F1, F2) for improved accuracy
+    
+    \item \textbf{Cross-Validation}: 5-fold CV for more reliable performance estimation
+    
+    \item \textbf{Hyperparameter Optimization}: Bayesian optimization or grid search for learning rate, dropout rate, architecture depth
+    
+    \item \textbf{Higher Resolution}: Use 224×224 images to preserve more detail (standard for ImageNet models)
+    
+    \item \textbf{Advanced Architectures}: ResNet blocks, attention mechanisms, or modern efficient architectures
+    
+    \item \textbf{More Training}: 50-100 epochs with early stopping could improve all models
+    
+    \item \textbf{Class Balancing}: Address imbalance (dandelion: 1,052 vs sunflower: 733 images)
+\end{enumerate}
+
+\section{Conclusion}
+
+This comprehensive study systematically analyzed the impact of various CNN hyperparameters on flower classification performance through 16+ experiments. We identified optimal configurations and demonstrated the critical importance of careful hyperparameter selection.
+
+\subsection{Key Takeaways}
+\begin{enumerate}
+    \item \textbf{Color information is paramount}: RGB images (70.14\%) vastly outperformed grayscale (55.09\%), representing a 27.3\% relative improvement with minimal parameter increase
+    
+    \item \textbf{Architecture matters more than size}: F1 with 4 conv layers and 507K parameters outperformed the 843K parameter baseline, proving efficiency beats raw capacity
+    
+    \item \textbf{Activation function choice is critical}: ReLU family performed well (53-55\%), while Sigmoid completely failed (24\%), confirming importance of gradient flow
+    
+    \item \textbf{Over-regularization hurts small datasets}: Light dropout (0.1) optimal; stronger regularization (0.25) or batch normalization severely degraded performance
+    
+    \item \textbf{Task difficulty varies greatly}: Same architecture achieved 99.10\% on MNIST but 70.14\% on flowers, reflecting inherent complexity differences
+    
+    \item \textbf{Diminishing returns exist}: Going from 4 to 5 conv layers showed minimal gain (0.23\%), while 6 layers caused overfitting (-11\%)
+    
+    \item \textbf{Simple choices often best}: 3×3 kernels, max pooling, single FC layer, and ReLU consistently performed well
+\end{enumerate}
+
+\subsection{Best Model Configuration}
+Based on all experiments, the optimal configuration is:
+
+\begin{itemize}
+    \item \textbf{Input}: RGB images (80×80×3)
+    \item \textbf{Convolutional Layers}: 3 layers with 3×3 kernels
+    \item \textbf{Filters}: [16, 32, 64]
+    \item \textbf{Pooling}: Max Pooling (2×2)
+    \item \textbf{Activation}: ReLU
+    \item \textbf{Regularization}: Dropout (0.1)
+    \item \textbf{FC Layers}: 1 layer (128 units)
+    \item \textbf{Performance}: 70.14\% test accuracy, 0.6987 F1 score
+    \item \textbf{Parameters}: 843,557 trainable parameters
+    \item \textbf{Training Time}: 16.44 seconds
+\end{itemize}
+
+\textbf{Alternative for deeper networks}: 4 conv layers (F1 configuration) achieved 59.95\% on grayscale with only 507K parameters, demonstrating efficient architecture design.
+
+\subsection{Future Work}
+\begin{enumerate}
+    \item \textbf{Transfer Learning}: Implement pre-trained ImageNet models (expected 85-95\% accuracy)
+    \item \textbf{Data Augmentation}: Apply comprehensive augmentation pipeline
+    \item \textbf{Advanced Architectures}: Explore ResNet, DenseNet, EfficientNet, Vision Transformers
+    \item \textbf{Attention Mechanisms}: Add spatial attention for better feature selection
+    \item \textbf{Multi-scale Processing}: Combine features from different resolutions
+    \item \textbf{Extended Dataset}: Collect more flower images, add more species
+    \item \textbf{Deployment}: Create mobile app for real-world flower identification
+    \item \textbf{Interpretability}: Use GradCAM, attention visualization to understand decisions
+    \item \textbf{Fine-grained Classification}: Distinguish flower varieties within species
+    \item \textbf{Segmentation**: Add flower localization and segmentation capabilities
+\end{enumerate}
+
+\section*{Acknowledgments}
+This work was completed as part of the Machine Learning Lab course. We acknowledge the use of TensorFlow/Keras framework and the flower dataset providers.
+
+\end{document}
