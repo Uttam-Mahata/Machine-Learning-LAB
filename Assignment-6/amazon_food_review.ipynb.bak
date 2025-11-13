@@ -141,7 +141,7 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 242M/242M [00:16<00:00, 15.5MB/s] "
+      "100%|██████████| 242M/242M [00:16<00:00, 15.5MB/s] "
      ]
     },
     {
@@ -321,51 +321,6 @@
     "\n",
     "# Check for missing values\n",
     "print(\"\\nMissing values:\")\n",
-    "print(df.isnull().sum())"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "missing_values_handling",
-   "metadata": {},
-   "source": [
-    "## Handle Missing Values\n",
-    "\n",
-    "We found missing values in:\n",
-    "- ProfileName: 16 missing values\n",
-    "- Summary: 27 missing values\n",
-    "\n",
-    "Since these columns are not used in our sentiment analysis (we only use Text and Score), \n",
-    "we have several options:\n",
-    "\n",
-    "1. **Drop rows with missing values**: Removes 43 rows out of 568,454 (~0.0076%)\n",
-    "2. **Fill missing values**: Replace with placeholder like \"Unknown\" or empty string\n",
-    "3. **Leave as is**: Since we don't use these columns in the analysis\n",
-    "\n",
-    "We'll choose option 1 (drop rows) to maintain data quality and consistency, \n",
-    "as the number of affected rows is negligible."
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "handle_missing_values",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "# Handle missing values\n",
-    "print(\"Dataset shape before handling missing values:\", df.shape)\n",
-    "rows_before = len(df)\n",
-    "\n",
-    "# Drop rows with missing ProfileName or Summary\n",
-    "df = df.dropna(subset=[\"ProfileName\", \"Summary\"])\n",
-    "\n",
-    "rows_after = len(df)\n",
-    "print(\"Dataset shape after dropping missing values:\", df.shape)\n",
-    "print(f\"Rows removed: {rows_before - rows_after}\")\n",
-    "\n",
-    "# Verify no missing values in these columns\n",
-    "print(\"\nMissing values after cleaning:\")\n",
     "print(df.isnull().sum())"
    ]
   },
